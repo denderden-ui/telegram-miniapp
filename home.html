@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Карта Telegram</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div id="main-container">
+    <div style="text-align: center; margin-top: 80px; margin-bottom: 20px;">
+      <button id="open-card-btn" class="main-card-btn">🎴 Получить карту</button>
+    </div>
+    <div id="card-display"></div>
+    <p id="user-id" style="text-align:center; margin-top: 20px;"></p>
+    <p style="text-align:center;">Баланс: <span id="tokens">–</span> токенов, <span id="currency">–</span> монет</p>
+  </div>
+
+  <script>
+    (async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let userId = urlParams.get('user_id') || localStorage.getItem("user_id");
+
+      if (window.Telegram?.WebApp) {
+        Telegram.WebApp.ready();
+        const user = Telegram.WebApp.initDataUnsafe?.user;
+        if (user) {
+          userId = user.id.toString();
+          localStorage.setItem("user_id", userId);
+        }
+      }
+
+      const userIdText = document.getElementById('user-id');
+      if (!userId) {
+        userIdText.innerText = "Пользователь не определён";
+        return;
+      } else {
+        userIdText.innerText = "Ваш Telegram ID: " + userId;
+      }
+
+      const registeredKey = `registered_${userId}`;
+      if (!localStorage.getItem(registeredKey)) {
+        try {
+          const res = await fetch("/api/register_user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId })
+          });
+          const data = await res.json();
+          if (data.status === "ok") {
+            localStorage.setItem(registeredKey, "true");
+          } else {
+            console.warn("Ошибка регистрации:", data);
+          }
+        } catch (err) {
+          console.error("Ошибка при регистрации:", err);
+        }
+      }
+
+      await updateBalance();
+
+      document.getElementById("open-card-btn").addEventListener("click", openCard);
+
+      async function updateBalance() {
+        try {
+          const res = await fetch(`/api/user-balance?user_id=${userId}`);
+          const data = await res.json();
+          if (res.ok) {
+            document.getElementById("tokens").innerText = data.tokens;
+            document.getElementById("currency").innerText = data.currency;
+          } else {
+            console.warn("Не удалось получить баланс:", data.error || "Неизвестная ошибка");
+          }
+        } catch (err) {
+          console.error("Ошибка при получении баланса:", err);
+        }
+      }
+
+      async function openCard() {
+        const btn = document.getElementById('open-card-btn');
+        btn.disabled = true;
+        btn.innerText = 'Загрузка...';
+
+        try {
+          const res = await fetch(`/api/open-card?user_id=${userId}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Ошибка получения карты');
+
+          document.getElementById('tokens').innerText = data.tokens;
+          document.getElementById('currency').innerText = data.currency;
+
+          const cardImage = document.getElementById('card-image') || createImageElement();
+          const cardInfo = document.getElementById('card-info') || createInfoElement();
+
+          ['common', 'rare', 'super-rare', 'ultra-rare', 'mythic'].forEach(cls => {
+            cardImage.classList.remove(cls);
+            cardInfo.classList.remove(cls);
+          });
+
+          const rarityClass = data.rarity.toLowerCase().replace(/\s+/g, "-");
+          cardImage.src = data.image;
+          cardImage.classList.add('card-img', rarityClass, 'animate-pop');
+          cardInfo.classList.add('card-info', rarityClass);
+
+          cardInfo.innerHTML = `
+            <h3 id="card-name">${data.name}</h3>
+            <p id="card-description">${data.description}</p>
+            <p id="card-rarity">Редкость: ${data.rarity}</p>
+            <p id="card-reward">Награда: +${data.reward}</p>
+          `;
+        } catch (err) {
+          alert(err.message || "Ошибка соединения");
+        } finally {
+          btn.disabled = false;
+          btn.innerText = '🎴 Получить карту';
+        }
+      }
+
+      function createImageElement() {
+        const img = document.createElement("img");
+        img.id = "card-image";
+        img.classList.add("card-img");
+        document.getElementById("card-display").appendChild(img);
+        return img;
+      }
+
+      function createInfoElement() {
+        const div = document.createElement("div");
+        div.id = "card-info";
+        div.classList.add("card-info");
+        document.getElementById("card-display").appendChild(div);
+        return div;
+      }
+    })();
+  </script>
+</body>
+</html>

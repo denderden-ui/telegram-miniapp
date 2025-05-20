@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточный мини-апп</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать в мини-игру!</h1>
+
+        <p id="user-id">Загрузка ID...</p>
+
+        <div class="balance">
+            <p><strong>🧿 Токены:</strong> <span id="tokens">?</span></p>
+            <p><strong>💸 Валюта:</strong> <span id="currency">?</span></p>
+        </div>
+
+        <button id="open-card-btn" onclick="openCard()">🎴 Получить карту</button>
+
+        <div class="card-display" id="card-display">
+            <img id="card-image" src="" alt="Card Image" class="card-img" />
+            <div id="card-info" class="card-info">
+                <p><strong>📛 Название:</strong> <span id="card-name"></span></p>
+                <p><strong>📝 Описание:</strong> <span id="card-description"></span></p>
+                <p><strong>⭐️ Редкость:</strong> <span id="card-rarity"></span></p>
+                <p><strong>💰 Награда:</strong> <span id="card-reward"></span></p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by Telegram WebApp</p>
+        </footer>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('user_id');
+        document.getElementById('user-id').textContent = userId ? `Ваш ID: ${userId}` : 'ID не найден';
+
+        async function fetchBalance() {
+            if (!userId) return;
+            try {
+                const res = await fetch(`/api/user-balance?user_id=${userId}`);
+                const data = await res.json();
+                document.getElementById('tokens').textContent = data.tokens;
+                document.getElementById('currency').textContent = data.currency;
+            } catch (err) {
+                console.error('Ошибка загрузки баланса:', err);
+            }
+        }
+
+        async function openCard() {
+            if (!userId) return;
+            try {
+                const res = await fetch(`/api/open-card?user_id=${userId}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                document.getElementById('card-image').src = data.image;
+                document.getElementById('card-name').textContent = data.name;
+                document.getElementById('card-description').textContent = data.description;
+                document.getElementById('card-rarity').textContent = data.rarity;
+                document.getElementById('card-reward').textContent = data.reward;
+
+                document.getElementById('tokens').textContent = data.tokens;
+                document.getElementById('currency').textContent = data.currency;
+            } catch (err) {
+                console.error('Ошибка при получении карты:', err);
+            }
+        }
+
+        window.onload = fetchBalance;
+    </script>
+</body>
+</html>

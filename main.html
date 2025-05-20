@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini App</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- Загрузочный экран -->
+  <div id="loader" style="text-align:center; margin-top: 50px;">
+    <p>Загрузка...</p>
+  </div>
+
+  <!-- Основной контент -->
+  <div id="content" style="display: none; text-align: center; margin-top: 50px;">
+    <h2>Добро пожаловать в мини-приложение!</h2>
+    <p id="user-id"></p>
+  </div>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const loader = document.getElementById("loader");
+      const content = document.getElementById("content");
+      const userText = document.getElementById("user-id");
+
+      try {
+        if (window.Telegram && Telegram.WebApp) {
+          const tg = Telegram.WebApp;
+          tg.ready();
+
+          const user = tg.initDataUnsafe?.user;
+          const userId = user?.id?.toString();
+
+          if (userId) {
+            userText.innerText = `Ваш Telegram ID: ${userId}`;
+
+            // Регистрируем пользователя на сервере
+            const res = await fetch("/api/register_user", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ user_id: userId })
+            });
+
+            const data = await res.json();
+            if (data.status !== "ok") {
+              alert("Ошибка при регистрации пользователя.");
+            }
+
+            // Показ основного контента
+            loader.style.display = "none";
+            content.style.display = "block";
+          } else {
+            loader.innerText = "Ошибка: не удалось получить данные пользователя.";
+          }
+        } else {
+          loader.innerText = "Мини-приложение открыто вне Telegram.";
+        }
+      } catch (err) {
+        console.error("Ошибка:", err);
+        loader.innerText = "Произошла ошибка при инициализации.";
+      }
+    });
+  </script>
+</body>
+</html>
+
+

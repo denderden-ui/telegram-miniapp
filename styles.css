@@ -1,0 +1,208 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #1e1e1e;
+  overflow-x: hidden;
+  color: #f0f0f0;
+  font-family: 'Segoe UI', sans-serif;
+  touch-action: manipulation;
+}
+
+/* Основной контейнер */
+#main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6rem 1rem 6rem;
+  text-align: center;
+}
+
+/* Закреплённая панель с балансом и кнопкой */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: linear-gradient(to right, #1e1e1e, #2a2a2a);
+  z-index: 1000;
+  padding: 1rem 0 0.5rem;
+  border-bottom: 1px solid #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.stats-section {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Кнопка открытия карты */
+#open-card-btn {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background-color: #e50914;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(229, 9, 20, 0.5);
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+#open-card-btn:hover {
+  background-color: #ff2b2b;
+  transform: scale(1.05);
+}
+
+#open-card-btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+/* Отображение карты */
+#card-display {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding-top: 1rem;
+  max-width: 90%;
+}
+
+.card-img {
+  width: 90%;
+  max-width: 300px;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s;
+}
+
+.card-img:hover {
+  transform: scale(1.03);
+}
+
+/* Нижняя навигация */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #111;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  border-top: 1px solid #444;
+  z-index: 1000;
+}
+
+.bottom-nav button {
+  background: none;
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.bottom-nav button:hover {
+  color: #e50914;
+}
+
+/* Загрузочный экран */
+#loader-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("/static/loader.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 9999;
+  display: none;
+}
+
+/* Редкость: стили и анимации */
+@keyframes glowWave {
+  0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+  50% { box-shadow: 0 0 25px var(--rarity-color); }
+  100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+
+@keyframes waveFade {
+  0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+  60% { box-shadow: 0 0 15px var(--rarity-color); }
+  100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+
+.card-img.animate-pop {
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.card-info {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+  margin-top: 1rem;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Цвета по редкости */
+.card-img.common,
+.card-info.common {
+  --rarity-color: rgba(199, 21, 133, 0.6);
+  animation: glowWave 0.6s ease-out;
+}
+
+.card-info.common {
+  animation: waveFade 0.8s ease-out;
+}
+
+.card-img.rare,
+.card-info.rare {
+  --rarity-color: rgba(255, 105, 180, 0.6);
+  animation: glowWave 0.6s ease-out;
+}
+.card-info.rare {
+  animation: waveFade 0.8s ease-out;
+}
+
+.card-img.super-rare,
+.card-info.super-rare {
+  --rarity-color: rgba(138, 43, 226, 0.6);
+  animation: glowWave 0.6s ease-out;
+}
+.card-info.super-rare {
+  animation: waveFade 0.8s ease-out;
+}
+
+.card-img.ultra-rare,
+.card-info.ultra-rare {
+  --rarity-color: rgba(173, 216, 230, 0.6);
+  animation: glowWave 0.6s ease-out;
+}
+.card-info.ultra-rare {
+  animation: waveFade 0.8s ease-out;
+}
+
+.card-img.mythic,
+.card-info.mythic {
+  --rarity-color: rgba(255, 215, 0, 0.7);
+  animation: glowWave 0.6s ease-out;
+}
+.card-info.mythic {
+  animation: waveFade 0.8s ease-out;
+}
+
+
